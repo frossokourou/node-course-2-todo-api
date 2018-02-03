@@ -12,7 +12,7 @@ const app = express();
 // bodyParser.json(): A new body object containing the parsed data is populated on the request object after the middleware (i.e. req.body)
 app.use(bodyParser.json());
 
-// configure routes -> set up a route
+// Create Resource Endpoint -> set up a route
 // url for resources (new todo): '/todos'
 app.post('/todos', (req, res) => {
   // req.body object is a JSON due to app.use() above
@@ -29,6 +29,15 @@ app.post('/todos', (req, res) => {
     // from http statuses.com
     res.status(400).send(e);
   });
+});
+
+// List resources
+app.get('/todos', (req, res) => {
+  Todo.find().then((todos) => {
+    res.send({todos});        // sending back an object lets you add fields
+  }, (err) => {
+    res.status(400).send(err);
+  })
 });
 
 // the server listens on port 3000
