@@ -2,10 +2,6 @@
 
 const {MongoClient, ObjectID} = require('mongodb');
 
-const obj = ObjectID();
-console.log(obj);
-console.log('date variable', obj.getTimestamp());
-
 // define path or url of the database to connect and a callback
 MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   if (err) {
@@ -13,7 +9,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Connected to MongoDB server');
 
-  // access the Todos collection and find all records
+  // access the Todos collection and find all records -> .find().toArray().then()
   // .toArray() returns a promise .then((resolved) => {}, (failed) => {})
   // db.collection('Todos').find({
   //   _id: new ObjectID('5a61056d1f41174b82f7838f')

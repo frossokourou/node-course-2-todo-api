@@ -3,9 +3,6 @@
 
 const {MongoClient, ObjectID} = require('mongodb');
 // object destructuring ES6
-// const user = {name: 'andrew', age: 25};
-// const {name} = user;
-// console.log(name);    // prints 'andrew'
 
 const obj = ObjectID();
 console.log(obj);
@@ -19,13 +16,13 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Connected to MongoDB server');
 
-  // 'Todos' is the name of the collection - args: the item to insert and a callback
+  // 'Todos' is the name of the collection - obj: the item to insert and a callback
   // db.collection('Todos').insertOne({
   //   text: 'something to do',
   //   completed: false
   // }, (err, result) => {
   //   if (err) {
-  //     // return the error also
+  //     // return the error as well
   //     return console.log('Unable to insert todo', err);
   //   }
   //   console.log(JSON.stringify(result.ops, undefined, 2));

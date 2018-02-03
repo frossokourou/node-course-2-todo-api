@@ -13,10 +13,11 @@ const app = express();
 app.use(bodyParser.json());
 
 // configure routes -> set up a route
-// url for resources (new todo): './todos'
+// url for resources (new todo): '/todos'
 app.post('/todos', (req, res) => {
   // req.body object is a JSON due to app.use() above
   console.log(req.body);
+  // use the data from the client request ->  req.body
   const todo = new Todo({
     text: req.body.text
   });
@@ -25,6 +26,7 @@ app.post('/todos', (req, res) => {
   todo.save().then((doc) => {
     res.send(doc);
   }, (e) => {
+    // from http statuses.com
     res.status(400).send(e);
   });
 });
@@ -34,6 +36,9 @@ app.listen(3000, () => {
   console.log('Started on port 3000...');
 });
 
+module.exports = {
+  app
+};
 // // create a new Todo
 // const newTodo = new Todo({
 //   text: '    Cook dinner  '
