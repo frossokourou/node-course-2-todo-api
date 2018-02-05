@@ -37,7 +37,7 @@ app.get('/todos', (req, res) => {
     res.send({todos});        // sending back an object lets you add fields
   }, (err) => {
     res.status(400).send(err);
-  })
+  });
 });
 
 // the server listens on port 3000
