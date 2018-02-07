@@ -8,6 +8,8 @@ const {Todo} = require('./models/todo');
 
 // start the server by calling express as a function
 const app = express();
+// set a port in order to deploy to Heroku
+const port = process.env.PORT || 3000;
 
 // .use() to use a middleware
 // bodyParser.json(): A new body object containing the parsed data is populated on the request object after the middleware (i.e. req.body)
@@ -59,8 +61,8 @@ app.get('/todos/:id', (req, res) => {
 });
 
 // the server listens on port 3000
-app.listen(3000, () => {
-  console.log('Started on port 3000...');
+app.listen(port, () => {
+  console.log(`Started up at port ${port}...`);
 });
 
 module.exports = {
