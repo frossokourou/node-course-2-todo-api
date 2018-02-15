@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -83,6 +84,43 @@ app.delete('/todos/:id', (req, res) => {
   });
 });
 
+// update a document -> route: PATCH
+app.patch('/todos/:id', (req, res) => {
+  const id = req.params.id;
+  // _.pick(obj, ['a', 'b']) --> Creates an object composed of the picked object properties
+  const body = _.pick(req.body, ['text', 'completed']);  // in the array properties to update if they exist
+
+  // validate the id
+  if(!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+  // check if there is a completed value and is equal to true
+  if (_.isBoolean(body.completed) && body.completed) {
+    // set a timestamp for completion
+    body.completedAt = new Date().getTime();
+  } else {
+    // there is no key named 'completed' in the body object
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  Todo.findByIdAndUpdate(id, {
+    $set: body      // body is an object with the keys 'text', 'completed', 'completedAt'
+  }, {
+    new: true         // instead of {returnOriginal: false} used in mongodb
+  }).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.status(200).send({todo });
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
+
+
 // the server listens on port 3000
 app.listen(port, () => {
   console.log(`Started up at port ${port}...`);
@@ -91,14 +129,3 @@ app.listen(port, () => {
 module.exports = {
   app
 };
-// // create a new Todo
-// const newTodo = new Todo({
-//   text: '    Cook dinner  '
-// });
-//
-// // update the database -> save() returns a promise
-// newTodo.save().then((doc) => {
-//   console.log('Saved todo', JSON.stringify(doc, undefined, 2));
-// }, (e) => {
-//   console.log('Unable to save todo', e);
-// });

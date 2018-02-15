@@ -116,7 +116,7 @@ describe('GET /todos/:id', () => {
      .delete(`/todos/${hexId}`)
      .expect(200)
      .expect((res) => {
-       expect(res.body.todo._id).toBe(hexId);   // -----> todo?
+       expect(res.body.todo._id).toBe(hexId);   // res.body (response defined by supertest)
      })
      // pass a callback to check async before ending
      .end((err, res) => {
