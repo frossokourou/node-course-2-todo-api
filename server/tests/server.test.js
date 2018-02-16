@@ -12,7 +12,9 @@ const todos = [{
   text: 'First test todo'
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed: true,
+  completeAt: 123
 }];
 
 // before each test empty the database
@@ -29,9 +31,9 @@ describe('POST /todos', () => {
 
     // make the request via supertest
     request(app)  // pass the app where we want to make the request on
-      .post('/todos')   // to make a post request
+      .post('/todos')   // url to make a post request
       .send({text})   // to send data along with the request (supertest converts {text} to json)
-      .expect(200)    // make assert ions about the request -> status
+      .expect(200)    // make assertions about the request -> status
       // make assertions about the body that comes back -> result
       .expect((res) => {
         expect(res.body.text).toBe(text);       // ???
@@ -141,5 +143,45 @@ describe('GET /todos/:id', () => {
      .delete('/todos/123')
      .expect(404)
      .end(done);
+   });
+ });
+
+ describe('PATCH /todos/:id', () => {
+   it('should update the todo', (done) => {
+     const id = todos[0]._id.toHexString();
+     const body = {
+       text: 'This is the updated text',
+       completed: true
+     }
+
+     request(app)
+     .patch(`/todos/${id}`)
+     .send(body)
+     .expect(200)
+     .expect((res) => {
+       expect(res.body.todo.text).toBe(body.text);
+       expect(res.body.todo.completed).toBe(true);
+       expect(res.body.todo.completedAt).toBeA('number');
+     })
+     .end(done);
+   });
+   it ('should clear completedAt when todo is not complete', (done) => {
+     const hexId = todos[1]._id.toHexString();
+     const text = 'Updated todo text';
+
+     request(app)
+     .patch(`/todos/${hexId}`)
+     .send({
+       text,
+       completed: false,
+       completedAt: null
+     })
+     .expect(200)
+     .expect((res) => {
+       expect(res.body.todo.text).toBe(text);
+       expect(res.body.todo.completed).toBe(false);
+       expect(res.body.todo.completedAt).toNotExist();
+     })
+     .end(done); 
    });
  });
