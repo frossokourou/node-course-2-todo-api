@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,7 +12,7 @@ const {Todo} = require('./models/todo');
 // start the server by calling express as a function
 const app = express();
 // set a port in order to deploy to Heroku
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // .use() to use a middleware
 // bodyParser.json(): A new body object containing the parsed data is populated on the request object after the middleware (i.e. req.body)
@@ -124,6 +126,7 @@ app.patch('/todos/:id', (req, res) => {
 // the server listens on port 3000
 app.listen(port, () => {
   console.log(`Started up at port ${port}...`);
+  console.log(process.env.MONGODB_URI);
 });
 
 module.exports = {

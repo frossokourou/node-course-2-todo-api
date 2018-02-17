@@ -152,7 +152,7 @@ describe('GET /todos/:id', () => {
      const body = {
        text: 'This is the updated text',
        completed: true
-     }
+     };
 
      request(app)
      .patch(`/todos/${id}`)
@@ -182,6 +182,6 @@ describe('GET /todos/:id', () => {
        expect(res.body.todo.completed).toBe(false);
        expect(res.body.todo.completedAt).toNotExist();
      })
-     .end(done); 
+     .end(done);
    });
  });
