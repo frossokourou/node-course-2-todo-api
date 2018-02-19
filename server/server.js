@@ -1,4 +1,4 @@
-require('./config/config');
+require('./config/config');  // runs config.js
 
 const _ = require('lodash');
 const express = require('express');
@@ -121,7 +121,23 @@ app.patch('/todos/:id', (req, res) => {
   });
 });
 
+// create a new User
+app.post('/users', (req, res) => {
+  const userObj = _.pick(req.body, ['email', 'password']);
 
+  const user = new User(userObj);     // no need to create the object since it exists
+
+  // save the new user
+  user.save().then(() => {
+    // function call returns token object
+    return user.generateAuthToken();
+  }).then((token) => {
+    // send the token back as an https response header
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
 
 // the server listens on port 3000
 app.listen(port, () => {
