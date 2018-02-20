@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 const {mongoose} = require('./db/mongoose');
 const {User} = require('./models/user');
 const {Todo} = require('./models/todo');
+const {authenticate} = require('./middleware/authenticate');
 
 // start the server by calling express as a function
 const app = express();
@@ -137,6 +138,11 @@ app.post('/users', (req, res) => {
   }).catch((e) => {
     res.status(400).send(e);
   })
+});
+
+// set a private route
+app.get('/users/me', authenticate, (req, res) => {    // use the middleware -> authenticate
+    res.send(req.user);
 });
 
 // the server listens on port 3000
