@@ -51,9 +51,9 @@ UserSchema.methods.generateAuthToken = function () {
   const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString(); // takes the object and the salt secret key and returns token
   user.tokens = [{access, token}];
 
-  return user.save().then(() => {
+  return user.save().then(() => {     // returns a promise
     // return token to use in the next then() call (in server.js)
-    console.log(user);
+    console.log('user authenticated', {_id: user._id, email: user.email});
     return token;
   });
 };
@@ -77,6 +77,31 @@ UserSchema.statics.findByToken = function (token) {
     _id: decoded._id,
     'tokens.access': 'auth',
     'tokens.token': token
+  });
+};
+// returns a promise -> if resolved returns a user
+UserSchema.statics.findByCredentials = function (email, password) {
+  const User = this;
+
+  return User.findOne({email}).then((user) => {
+    if (!user) {
+      return Promise.reject();
+    }
+    // email exists -> check the password
+    if (!password) {
+      return Promise.reject();    // password is required by user model
+    }
+    // prefers to return a promise - bcrypt works with callback
+    return new Promise((resolve, reject) => {
+      // compare passwords
+      bcrypt.compare(password, user.password, (error, response) => {
+        if (response) {
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
   });
 };
 
