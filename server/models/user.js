@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -34,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   }]
 });
 
-//override the method toJSON() -> determines what gets back when it is converted into a JSON value
+//override the method toJSON() -> determine what gets back when it is converted into a JSON value
 UserSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();     // converts user into object
@@ -47,7 +48,7 @@ UserSchema.methods.generateAuthToken = function () {
   // this keyword stores the individual document 'user'
   const user = this;    // needs to have access to that specific instance (user)
   const access = 'auth';
-  const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+  const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString(); // takes the object and the salt secret key and returns token
   user.tokens = [{access, token}];
 
   return user.save().then(() => {
@@ -78,6 +79,23 @@ UserSchema.statics.findByToken = function (token) {
     'tokens.token': token
   });
 };
+
+// runs some code before the save event
+UserSchema.pre('save', function (next) {
+  const user = this;
+
+  // use a mongoose method available on our instance -> isModified
+  if (user.isModified('password')) {        // argument is the key to check
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(user.password, salt, (err, hash) => {
+        user.password = hash;
+        next();       // call next() to save user
+      });
+    });
+  } else {    // it was not modified => it was already hashed (don't hash it again)
+    next();
+  }
+});
 
 const User = mongoose.model('User', UserSchema);
 

@@ -1,11 +1,33 @@
 const {SHA256} = require('crypto-js');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-const message = 'I am user number 3';
-const hash = SHA256(message).toString();
+const password = '123abc!';
 
-console.log('Message:', message);
-console.log(`Hash: ${hash}`);
+// generate a salt (rounds, callback) --> needs time to generate salt (10 rounds)
+bcrypt.genSalt(10, (err, salt) => {
+  // hash the password
+  bcrypt.hash(password, salt, (err, hash) => {
+    console.log('hashedPassword:', hash);
+  });
+});
+
+const hashedPassword = '$2a$10$mYClcmnZ0dFGG3kMGpVUBecTNcHDN0bGs8WeCs4YK8A332R.4Xqhq';
+
+//check if given password is correct
+// bcrypt.compare(password, hashedPassword, (err, res) => {
+//   console.log(res);     // prints true
+// });
+
+bcrypt.compare('123!', hashedPassword, (err, res) => {
+  console.log(res);     // prints false
+});
+
+// const message = 'I am user number 3';
+// const hash = SHA256(message).toString();
+//
+// console.log('Message:', message);
+// console.log(`Hash: ${hash}`);
 
 const data = {
   id: 4
