@@ -160,6 +160,17 @@ app.post('/users/login', (req, res) => {
   });
 });
 
+// logout a user -> remove token. Private route -> use authenticate middleware
+app.delete('/users/me/token', authenticate , (req, res) => {
+  const user = req.user;
+  // call an instance method, need access to the specific user
+  return user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
+
 // the server listens on port 3000
 app.listen(port, () => {
   console.log(`Started up at port ${port}...`);

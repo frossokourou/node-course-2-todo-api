@@ -265,7 +265,7 @@ describe('POST /users/login', () => {
     .expect((res) => {
       expect(res.header['x-auth']).toExist();
     })
-    // make assertions about the result
+    // make assertions about the response
     .end((err, res) => {
       if (err) {
         return done(err);

@@ -58,6 +58,16 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+UserSchema.methods.removeToken = function (token) {
+  const user = this;
+  // we want to remove any object in the tokens array that has {token: token}
+  return user.update({
+    $pull: {          // update operator -> removes the whole object
+      tokens: {token}
+    }
+  });
+};
+
 // adds a model method in the UserSchema.statics object
 UserSchema.statics.findByToken = function (token) {
   const User = this;
@@ -66,14 +76,11 @@ UserSchema.statics.findByToken = function (token) {
   try {
     decoded = jwt.verify(token, 'abc123');  // obj that stores the decoded user id & id creation time
   } catch (e) {
-    // return a new promise that fails
+    // return a new promise and call reject()
     return Promise.reject();
-    // return new Promise((resolve, reject) => {
-    //   reject();
-    // });
   };
   // continue if success
-  return User.findOne({     // returns a specific user
+  return User.findOne({     // returns a specific user with these credentials
     _id: decoded._id,
     'tokens.access': 'auth',
     'tokens.token': token

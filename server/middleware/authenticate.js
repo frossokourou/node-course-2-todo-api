@@ -2,10 +2,10 @@ const {User} = require('../models/user');
 
 // create a middleware
 const authenticate = (req, res, next) => {
-  const token = req.header('x-auth');
+  const token = req.header('x-auth');     // takes the value of the header
 
   // verify the token & fetch the user
-  User.findByToken(token).then((user) => {    // invokes the model method
+  User.findByToken(token).then((user) => {    // invokes the model method findByToken
     if (!user) {
       return Promise.reject();      // sends it directly to catch
     }
