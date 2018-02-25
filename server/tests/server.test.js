@@ -179,7 +179,7 @@ describe('GET /users/me', () => {
     request(app)
     .get('/users/me')
     // set a header
-    .set('x-auth', users[0].tokens[0].token)
+    .set('x-auth', users[0].tokens[0].token)      // sets a header as request data
     // the first user should be authenticated
     .expect(200)
     .expect((res) => {
@@ -299,6 +299,26 @@ describe('POST /users/login', () => {
       }
 
       User.findById(users[1]._id).then((user) => {
+        expect(user.tokens.length).toBe(0);
+        done();
+      }).catch((e) => done(e));
+    });
+  });
+});
+
+describe('DELETE /users/me/token', () => {
+  it('should remove auth token on logout', (done) => {
+    // use first user from seed.js
+    request(app)
+    .delete('/users/me/token')
+    .set('x-auth', users[0].tokens[0].token)     // sets a header, route uses the token to authenticate
+    .expect(200)
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+
+      User.findById(users[0]._id).then((user) => {
         expect(user.tokens.length).toBe(0);
         done();
       }).catch((e) => done(e));
