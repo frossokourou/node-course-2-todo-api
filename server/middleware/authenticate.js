@@ -20,3 +20,5 @@ const authenticate = (req, res, next) => {
 };
 
 module.exports = {authenticate};
+// when the middleware is used, the x-auth token should be provided with the call
+// and the token will be retrieved by req.header('x-auth')

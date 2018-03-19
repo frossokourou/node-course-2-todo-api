@@ -22,12 +22,13 @@ app.use(bodyParser.json());
 
 // Create Resource Endpoint -> set up a route
 // url for resources (new todo): '/todos'
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   // req.body object is a JSON due to app.use() above
   console.log(req.body);
   // use the data from the client request ->  req.body
   const todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id     // authenticate gives access to req.user
   });
   console.log(JSON.stringify(todo, undefined, 2));
 
@@ -40,22 +41,28 @@ app.post('/todos', (req, res) => {
 });
 
 // List resources
-app.get('/todos', (req, res) => {
-  Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, res) => {
+  Todo.find({
+    _creator: req.user._id    // returns only the todos of the authenticated user
+  }).then((todos) => {
     res.send({todos});        // sending back an object lets you add fields
   }, (err) => {
     res.status(400).send(err);
   });
 });
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   // res.send(req.params);
   const id = req.params.id;         // the user gives the id via the url /todos/:id
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send('ID not valid');
   }
-  Todo.findById(id).then((todo) => {
+  
+  Todo.findOne({
+    _id: id,     // given in the url
+    _creator: req.user._id    // req.user is returned by authenticate
+  }).then((todo) => {
     if(!todo) {
       return res.status(404).send();
     }
@@ -65,7 +72,7 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   // get the id
   const id = req.params.id;
   console.log('id:', id);
@@ -75,7 +82,10 @@ app.delete('/todos/:id', (req, res) => {
     return res.status(404).send();
   }
   // remove todo by id
-  Todo.findByIdAndRemove(id).then((todo) => {
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     // if no doc, send 404
     if (!todo) {
       return res.status(404).send();
@@ -89,7 +99,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 // update a document -> route: PATCH
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
   // _.pick(obj, ['a', 'b']) --> Creates an object composed of the picked object properties
   const body = _.pick(req.body, ['text', 'completed']);  // in the array properties to update if they exist
@@ -98,7 +108,7 @@ app.patch('/todos/:id', (req, res) => {
   if(!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
-  // check if there is a completed value and is equal to true
+  // check if there is a completed value and it is equal to true
   if (_.isBoolean(body.completed) && body.completed) {
     // set a timestamp for completion
     body.completedAt = new Date().getTime();
@@ -108,7 +118,10 @@ app.patch('/todos/:id', (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id, {
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: req.user._id
+  }, {
     $set: body      // body is an object with the keys 'text', 'completed', 'completedAt'
   }, {
     new: true         // instead of {returnOriginal: false} used in mongodb
